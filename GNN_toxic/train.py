@@ -58,7 +58,7 @@ def test(epoch, model, test_loader, loss_fn):
     # calculate_metrics(all_preds, all_labels, epoch, "test")
     return loss
 
-def calculate_metrics(y_pred, y_true, epoch, type):
+def calculate_metrics(y_pred, y_true):
     print(f"\n Confusion matrix: \n {confusion_matrix(y_pred, y_true)}")
     print(f"F1 Score: {f1_score(y_pred, y_true)}")
     print(f"Accuracy: {accuracy_score(y_pred, y_true)}")
@@ -86,7 +86,7 @@ def train(epochs):
     # Loss and Optimizer
     weights = torch.tensor([1, 10], dtype=torch.float32).to(device)
     loss_fn = torch.nn.CrossEntropyLoss(weight=weights)
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9)  
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)  
     scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
             
     # Start training
@@ -156,23 +156,7 @@ def plot_learning_curve(train_loss, test_loss):
     # save img file
     plt.savefig('./trained_model/learning_curve.png')
     
-def main():
-    print('Starting training...')
-    n_epochs = 100
-    model, best_loss, TRAIN_LOSS, TEST_LOSS = train(n_epochs)
-    # save trained model
-    save_torch_model(model)
-    plot_learning_curve(TRAIN_LOSS, TEST_LOSS)
-
-print('Starting training...')
-n_epochs = 50
-model, best_loss, TRAIN_LOSS, TEST_LOSS = train(n_epochs)
-# save trained model
-save_torch_model(model)
-plot_learning_curve(TRAIN_LOSS, TEST_LOSS)
-
-
-def predictions_on_test_dataset(model)
+def predictions_on_test_dataset(model):
     test_dataset = MoleculeDataset(root="./data/", filename="test.csv", test=True)
 
     y = []
@@ -185,3 +169,17 @@ def predictions_on_test_dataset(model)
     results = pd.DataFrame()
     results['y_true'] = y_t
     results['y_pred'] = y
+    return results
+
+def main():
+    print('Starting training...')
+    n_epochs = 25
+    model, best_loss, TRAIN_LOSS, TEST_LOSS = train(n_epochs)
+    # save trained model
+    save_torch_model(model)
+    plot_learning_curve(TRAIN_LOSS, TEST_LOSS)
+
+    results = predictions_on_test_dataset(model)
+    calculate_metrics(results['y_pred'].astype(int), results['y_true'].astype(int))
+
+    return results

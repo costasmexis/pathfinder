@@ -10,22 +10,22 @@ class GNN(torch.nn.Module):
     def __init__(self, feature_size):
         super(GNN, self).__init__()
         num_classes = 2
-        embedding_size = 1024
+        embedding_size = 512
     
         # GNN layers
         self.conv1 = GATConv(feature_size, embedding_size, heads=3, dropout=0.3)
-        self.head_transform1 = Linear(embedding_size*3, embedding_size)
+        self.head_transform1 = Linear(embedding_size*2, embedding_size)
         self.pool1 = TopKPooling(embedding_size, ratio=0.8)
         self.conv2 = GATConv(embedding_size, embedding_size, heads=3, dropout=0.3)
-        self.head_transform2 = Linear(embedding_size*3, embedding_size)
+        self.head_transform2 = Linear(embedding_size*2, embedding_size)
         self.pool2 = TopKPooling(embedding_size, ratio=0.5)
         self.conv3 = GATConv(embedding_size, embedding_size, heads=3, dropout=0.3)
-        self.head_transform3 = Linear(embedding_size*3, embedding_size)
+        self.head_transform3 = Linear(embedding_size*2, embedding_size)
         self.pool3 = TopKPooling(embedding_size, ratio=0.2)
 
         # Linear layers
-        self.linear1 = Linear(embedding_size*2, 1024)
-        self.linear2 = Linear(1024, num_classes)  
+        self.linear1 = Linear(embedding_size*2, embedding_size)
+        self.linear2 = Linear(embedding_size, num_classes)  
 
     def forward(self, x, edge_attr, edge_index, batch_index):
         # First block
@@ -61,7 +61,7 @@ class GNN(torch.nn.Module):
 
         # Output block
         x = self.linear1(x).relu()
-        x = F.dropout(x, p=0.5, training=self.training)
+        x = F.dropout(x, p=0.2, training=self.training)
         x = self.linear2(x)
 
         return x
