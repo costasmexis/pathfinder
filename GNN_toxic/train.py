@@ -158,8 +158,30 @@ def plot_learning_curve(train_loss, test_loss):
     
 def main():
     print('Starting training...')
-    model, best_loss, TRAIN_LOSS, TEST_LOSS = train(70)
+    n_epochs = 100
+    model, best_loss, TRAIN_LOSS, TEST_LOSS = train(n_epochs)
     # save trained model
     save_torch_model(model)
     plot_learning_curve(TRAIN_LOSS, TEST_LOSS)
 
+print('Starting training...')
+n_epochs = 50
+model, best_loss, TRAIN_LOSS, TEST_LOSS = train(n_epochs)
+# save trained model
+save_torch_model(model)
+plot_learning_curve(TRAIN_LOSS, TEST_LOSS)
+
+
+def predictions_on_test_dataset(model)
+    test_dataset = MoleculeDataset(root="./data/", filename="test.csv", test=True)
+
+    y = []
+    y_t = []
+    for i in range(len(test_dataset)):
+        y_true, y_pred = predict(model, test_dataset[i])
+        y.append(y_pred)
+        y_t.append(y_true)
+
+    results = pd.DataFrame()
+    results['y_true'] = y_t
+    results['y_pred'] = y
