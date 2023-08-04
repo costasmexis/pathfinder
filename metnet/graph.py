@@ -70,6 +70,19 @@ class Graph:
         paths['Correct'] = correct_pathways
         return paths
 
+    def calculate_smiles_similarity(self, data: Data):
+        for edge in tqdm(self.G.edges()):
+            a, b = edge[0], edge[1]
+            if data.get_compound_by_id(a).is_cofactor or data.get_compound_by_id(b).is_cofactor:
+                self.G.edges[(a, b)]['mol_weight'] = np.inf
+            else:
+                smiles1 = data.get_compound_by_id(a).smiles
+                smiles2 = data.get_compound_by_id(b).smiles
+                ms = [Chem.MolFromSmiles(smiles1), Chem.MolFromSmiles(smiles2)]
+                fs = [Chem.RDKFingerprint(x) for x in ms]
+                s = DataStructs.FingerprintSimilarity(fs[0], fs[1])
+                self.G.edges[(a, b)]['smiles_similarity'] = 1-s
+
 
 
     '''
