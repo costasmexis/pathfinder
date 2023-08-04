@@ -28,3 +28,6 @@ class Data:
         for reaction in self.reactions.values():
             print(reaction)
 
+    def __len__(self):
+        print(f'Compounds: {len(self.compounds)}')
+        print(f'Reactions: {len(self.reactions)}')

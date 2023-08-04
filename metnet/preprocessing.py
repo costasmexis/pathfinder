@@ -1,7 +1,6 @@
 '''
 - First script to run. It preprocesses the raw data taken from pyminer paper and generates the datasets.
 '''
-
 import pandas as pd
 from tqdm import tqdm
 import json
@@ -45,7 +44,7 @@ def extract_stoichiometry(formula):
 def main():
 
     # **************** Compounds data **********************
-    df = pd.read_excel('data/original/KEGG_Pathway_Search_Ori.xlsx', sheet_name='Compound')
+    df = pd.read_excel('./data/original/KEGG_Pathway_Search_Ori.xlsx', sheet_name='Compound')
 
     # example usage
     element_names = extract_elements(df, 'Formula')
