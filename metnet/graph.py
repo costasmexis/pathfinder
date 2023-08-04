@@ -38,44 +38,21 @@ class Graph:
 
         #     self.G.edges[edge]['name'] = rxn_name 
 
-    def simple_shortest_path(self, src, trg):
-        return nx.all_shortest_paths(self.G, source=src, target=trg)
+    def simple_shortest_path(self, src, trg, cutoff=10):
+        return nx.all_simple_paths(self.G, source=src, target=trg, cutoff=cutoff)
 
-    
+    def calculate_edge_mol_weight(self, data: Data):
+        for edge in tqdm(self.G.edges()):
+            a, b = edge[0], edge[1]
+            if data.get_compound_by_id(a).is_cofactor or data.get_compound_by_id(b).is_cofactor:
+                self.G.edges[(a, b)]['mol_weight'] = np.inf
+            else:
+                w_a = data.get_compound_by_id(a).mw
+                w_b = data.get_compound_by_id(b).mw
+                w = (np.abs(w_a - w_b) / (w_a + w_b + 1e-6))
+                self.G.edges[(a, b)]['mol_weight'] = w
 
-
-
-
-
-
-
-    '''
-    def _get_num_occur(self, a,b):
-        t_a = self.num_occurences.loc[a]
-        t_b = self.num_occurences.loc[b]
-        w = max(t_a.values[0][0], t_b.values[0][0])
-        return w
-
-    def _get_mol_weight(self, data: Data, a, b):
-
-        if data.get_compound_by_id(a).is_cofactor or data.get_compound_by_id(b).is_cofactor:
-            return 999
-        
-        w_a = data.get_compound_by_id(a).mw
-        w_b = data.get_compound_by_id(b).mw
-        w = (np.abs(w_a-w_b) / (w_a+w_b+1e-6))
-        return w
-
-        
-    def simple_weighted_shortest_path(self, data: Data, test_cases, method):
-        
-        if method=='num_occur':
-            for edge in tqdm(self.G.edges()):
-                self.G.edges[(edge[0], edge[1])]['num_occur'] = self._get_num_occur(a=edge[0], b=edge[1])
-        elif method=='mol_weight':
-            for edge in tqdm(self.G.edges()):
-                self.G.edges[(edge[0], edge[1])]['mol_weight'] = self._get_mol_weight(data=data, a=edge[0], b=edge[1])
-
+    def validate(self, test_cases: pd.DataFrame, method: str):
         correct_pathways = []
         paths = []
         for row in range(len(test_cases)):
@@ -92,5 +69,13 @@ class Graph:
         paths['Pathway']  = paths['Pathway'].apply(lambda x: ast.literal_eval(x))
         paths['Correct'] = correct_pathways
         return paths
-    
-'''
+
+
+
+    '''
+    def _get_num_occur(self, a,b):
+        t_a = self.num_occurences.loc[a]
+        t_b = self.num_occurences.loc[b]
+        w = max(t_a.values[0][0], t_b.values[0][0])
+        return w
+    '''
