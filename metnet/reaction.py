@@ -11,3 +11,4 @@ class Reaction:
     
     def __str__(self):
         return f"ID: {self.entry}\nName: {self.name}\nCompounds: {self.compounds}\n"
+
