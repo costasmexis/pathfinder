@@ -4,6 +4,7 @@ import networkx as nx
 from tqdm import tqdm
 from data import Data
 import ast
+from itertools import islice
 
 from rdkit import Chem
 from rdkit import DataStructs
@@ -30,16 +31,8 @@ class Graph:
             self.G.nodes[node]['is_toxical'] = data.get_compound_by_id(node).is_toxic
             self.G.nodes[node]['is_cofactor'] = data.get_compound_by_id(node).is_cofactor
 
-        # set edge attributes
-        # for edge in tqdm(self.G.edges()):
-        #     rxn_name = self.pairs[(self.pairs['source']==edge[0]) & (self.pairs['target']==edge[1])]['Reaction']
-        #     if rxn_name.empty:
-        #         rxn_name = self.pairs[(self.pairs['source']==edge[1]) & (self.pairs['target']==edge[0])]['Reaction']
-
-        #     self.G.edges[edge]['name'] = rxn_name 
-
-    def simple_shortest_path(self, src, trg, cutoff=10):
-        return nx.all_simple_paths(self.G, source=src, target=trg, cutoff=cutoff)
+    def shortest_simple_paths(self, src, trg, weight=None, length=10):
+        return list(islice(nx.shortest_simple_paths(self.G, source=src, target=trg, weight=weight), length))
 
     def calculate_edge_mol_weight(self, data: Data):
         for edge in tqdm(self.G.edges()):
