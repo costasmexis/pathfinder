@@ -5,7 +5,7 @@ from tqdm import tqdm
 from data import Data
 import ast
 from itertools import islice
-
+from itertools import chain
 from rdkit import Chem
 from rdkit import DataStructs
 
@@ -34,6 +34,13 @@ class Graph:
     def shortest_simple_paths(self, src, trg, weight=None, length=10):
         return list(islice(nx.shortest_simple_paths(self.G, source=src, target=trg, weight=weight), length))
 
+    def has_duplicates(self, lst) -> bool:
+        return len(lst) != len(set(lst))
+    
+    def constrained_shortest_path(self, src, trg, weight=None) -> list:
+        paths = self.shortest_simple_paths(src, trg, weight=weight)
+        return paths
+    
     def calculate_edge_mol_weight(self, data: Data):
         for edge in tqdm(self.G.edges()):
             a, b = edge[0], edge[1]
@@ -44,6 +51,20 @@ class Graph:
                 w_b = data.get_compound_by_id(b).mw
                 w = (np.abs(w_a - w_b) / (w_a + w_b + 1e-6))
                 self.G.edges[(a, b)]['mol_weight'] = w
+
+
+    def calculate_smiles_similarity(self, data: Data):
+        for edge in tqdm(self.G.edges()):
+            a, b = edge[0], edge[1]
+            if data.get_compound_by_id(a).is_cofactor or data.get_compound_by_id(b).is_cofactor:
+                self.G.edges[(a, b)]['mol_weight'] = np.inf
+            else:
+                smiles1 = data.get_compound_by_id(a).smiles
+                smiles2 = data.get_compound_by_id(b).smiles
+                ms = [Chem.MolFromSmiles(smiles1), Chem.MolFromSmiles(smiles2)]
+                fs = [Chem.RDKFingerprint(x) for x in ms]
+                s = DataStructs.FingerprintSimilarity(fs[0], fs[1])
+                self.G.edges[(a, b)]['smiles_similarity'] = 1-s
 
     def validate(self, test_cases: pd.DataFrame, method: str):
         correct_pathways = []
@@ -62,26 +83,3 @@ class Graph:
         paths['Pathway']  = paths['Pathway'].apply(lambda x: ast.literal_eval(x))
         paths['Correct'] = correct_pathways
         return paths
-
-    def calculate_smiles_similarity(self, data: Data):
-        for edge in tqdm(self.G.edges()):
-            a, b = edge[0], edge[1]
-            if data.get_compound_by_id(a).is_cofactor or data.get_compound_by_id(b).is_cofactor:
-                self.G.edges[(a, b)]['mol_weight'] = np.inf
-            else:
-                smiles1 = data.get_compound_by_id(a).smiles
-                smiles2 = data.get_compound_by_id(b).smiles
-                ms = [Chem.MolFromSmiles(smiles1), Chem.MolFromSmiles(smiles2)]
-                fs = [Chem.RDKFingerprint(x) for x in ms]
-                s = DataStructs.FingerprintSimilarity(fs[0], fs[1])
-                self.G.edges[(a, b)]['smiles_similarity'] = 1-s
-
-
-
-    '''
-    def _get_num_occur(self, a,b):
-        t_a = self.num_occurences.loc[a]
-        t_b = self.num_occurences.loc[b]
-        w = max(t_a.values[0][0], t_b.values[0][0])
-        return w
-    '''
