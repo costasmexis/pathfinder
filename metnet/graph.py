@@ -34,11 +34,26 @@ class Graph:
     def shortest_simple_paths(self, src, trg, weight=None, length=10):
         return list(islice(nx.shortest_simple_paths(self.G, source=src, target=trg, weight=weight), length))
 
-    def has_duplicates(self, lst) -> bool:
+    def _has_duplicates(self, lst) -> bool:
         return len(lst) != len(set(lst))
     
+    # def to check if we are passing from a reaction twice
+    def _reaction_doubling(self, path: list) -> bool:
+        rxns_list = []
+        for i in range(len(path)-1):
+            cpd_a = path[i]
+            cpd_b = path[i+1]
+            rxns_list.append(self.pairs[(self.pairs['source'] == cpd_a) & (self.pairs['target'] == cpd_b)]['Reaction'].values)
+            rxns_list.append(self.pairs[(self.pairs['source'] == cpd_b) & (self.pairs['target'] == cpd_a)]['Reaction'].values)
+        
+        rxns_list = [arr for arr in rxns_list if arr.any()]
+        rxns_list = list(chain.from_iterable(rxns_list))
+        return self._has_duplicates(rxns_list)        
+
+
     def constrained_shortest_path(self, src, trg, weight=None) -> list:
         paths = self.shortest_simple_paths(src, trg, weight=weight)
+        paths = [path for path in paths if self._reaction_doubling(path)]
         return paths
     
     def calculate_edge_mol_weight(self, data: Data):
@@ -83,3 +98,4 @@ class Graph:
         paths['Pathway']  = paths['Pathway'].apply(lambda x: ast.literal_eval(x))
         paths['Correct'] = correct_pathways
         return paths
+    
