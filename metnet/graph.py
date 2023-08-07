@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import pickle
 import networkx as nx
 from tqdm import tqdm
 from data import Data
@@ -8,6 +9,7 @@ from itertools import islice
 from itertools import chain
 from rdkit import Chem
 from rdkit import DataStructs
+from networkx.algorithms.community import greedy_modularity_communities
 
 class Graph:
     def __init__(self, pairs: pd.DataFrame):
@@ -15,9 +17,13 @@ class Graph:
         self.G = None # Graph structure
         self.pairs = pairs
 
-    def get_number_of_occurences(self, pairs):
+        self._get_number_of_occurences()
+
+    # functions definitions
+    def _get_number_of_occurences(self):
         self.num_occurences = pd.DataFrame(pd.DataFrame(pd.concat([self.pairs['source'], self.pairs['target']], axis=0)).value_counts())
-        
+    
+
     def create_graph(self, data: Data, pairs: pd.DataFrame):
         self.G = nx.from_pandas_edgelist(self.pairs, source='source', target='target', 
                                          create_using=nx.Graph()) 
@@ -30,6 +36,19 @@ class Graph:
             self.G.nodes[node]['mw'] = data.get_compound_by_id(node).mw
             self.G.nodes[node]['is_toxical'] = data.get_compound_by_id(node).is_toxic
             self.G.nodes[node]['is_cofactor'] = data.get_compound_by_id(node).is_cofactor
+            self.G.nodes[node]['num_occurences'] = self.num_occurences.loc[node][0][0]
+
+    def _community_detection(self, weight=None):
+        # check if file exists in folder
+        try:
+            with open('./data/communities.pkl', 'rb') as f:
+                communities = pickle.load(f)
+                return communities
+        except FileNotFoundError:
+            communities = greedy_modularity_communities(self.G, weight=weight)
+            with open('./data/communities.pkl', 'wb') as f:
+                pickle.dump(communities, f)
+            return communities
 
     def shortest_simple_paths(self, src, trg, weight=None, length=10):
         return list(islice(nx.shortest_simple_paths(self.G, source=src, target=trg, weight=weight), length))
