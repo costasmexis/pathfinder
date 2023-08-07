@@ -34,9 +34,6 @@ class Graph:
     def shortest_simple_paths(self, src, trg, weight=None, length=10):
         return list(islice(nx.shortest_simple_paths(self.G, source=src, target=trg, weight=weight), length))
 
-    def _has_duplicates(self, lst) -> bool:
-        return len(lst) != len(set(lst))
-    
     # def to check if we are passing from a reaction twice
     def _reaction_doubling(self, path: list) -> bool:
         rxns_list = []
@@ -48,13 +45,32 @@ class Graph:
         
         rxns_list = [arr for arr in rxns_list if arr.any()]
         rxns_list = list(chain.from_iterable(rxns_list))
-        return self._has_duplicates(rxns_list)        
-
-
+        return len(rxns_list) != len(set(rxns_list))
+    
     def constrained_shortest_path(self, src, trg, weight=None) -> list:
         paths = self.shortest_simple_paths(src, trg, weight=weight)
-        paths = [path for path in paths if self._reaction_doubling(path)]
-        return paths
+        paths = [path for path in paths if not self._reaction_doubling(path)]
+        
+        # select path with max smiles similarity
+        smiles_sim = []
+        for p in paths:
+            sum = 0
+            compound_list = p
+            for i in range(len(compound_list)-1):
+                cpd_a = compound_list[i]
+                cpd_b = compound_list[i+1]
+                sum += self.G.edges[(cpd_a, cpd_b)]['smiles_similarity']
+                if self.G.edges[(cpd_a, cpd_b)]['smiles_similarity'] == 0:
+                    sum += self.G.edges[(cpd_b, cpd_a)]['smiles_similarity']
+            
+            smiles_sim.append(sum)
+        
+        try:
+            idx = (smiles_sim.index(min(smiles_sim)))
+        except ValueError:
+            idx = None
+
+        return paths, idx
     
     def calculate_edge_mol_weight(self, data: Data):
         for edge in tqdm(self.G.edges()):
@@ -71,16 +87,38 @@ class Graph:
     def calculate_smiles_similarity(self, data: Data):
         for edge in tqdm(self.G.edges()):
             a, b = edge[0], edge[1]
-            if data.get_compound_by_id(a).is_cofactor or data.get_compound_by_id(b).is_cofactor:
-                self.G.edges[(a, b)]['mol_weight'] = np.inf
-            else:
-                smiles1 = data.get_compound_by_id(a).smiles
-                smiles2 = data.get_compound_by_id(b).smiles
-                ms = [Chem.MolFromSmiles(smiles1), Chem.MolFromSmiles(smiles2)]
-                fs = [Chem.RDKFingerprint(x) for x in ms]
-                s = DataStructs.FingerprintSimilarity(fs[0], fs[1])
-                self.G.edges[(a, b)]['smiles_similarity'] = 1-s
+            smiles1 = data.get_compound_by_id(a).smiles
+            smiles2 = data.get_compound_by_id(b).smiles
+            ms = [Chem.MolFromSmiles(smiles1), Chem.MolFromSmiles(smiles2)]
+            fs = [Chem.RDKFingerprint(x) for x in ms]
+            s = DataStructs.FingerprintSimilarity(fs[0], fs[1])
+            self.G.edges[(a, b)]['smiles_similarity'] = 1-s
 
+    def validate(self, test_cases: pd.DataFrame, method: str):
+        correct_pathways = []
+        paths = []
+        for row in tqdm(range(len(test_cases))):
+            source = test_cases['source'].iloc[row]
+            target = test_cases['target'].iloc[row]
+            pred_path, idx = self.constrained_shortest_path(source, target, weight=method)
+            try:
+                pred_path = pred_path[idx]
+            except TypeError:
+                pass
+            correct_pathways.append((pred_path == test_cases['paths_list'].iloc[row]))
+            paths.append(pred_path)
+       
+        print(f'Correct pathway predictions: {correct_pathways.count(True)}')
+        print(f'Correct pathway predictions (%): {100 * correct_pathways.count(True) / len(correct_pathways)}')
+
+        # return the DataFrame with the resulted pathways and correct or not
+        paths = pd.DataFrame([str(p) for p in paths], columns=['Pathway'])
+        paths['Pathway']  = paths['Pathway'].apply(lambda x: ast.literal_eval(x))
+        paths['Correct'] = correct_pathways
+        return paths
+ 
+
+'''a
     def validate(self, test_cases: pd.DataFrame, method: str):
         correct_pathways = []
         paths = []
@@ -98,4 +136,4 @@ class Graph:
         paths['Pathway']  = paths['Pathway'].apply(lambda x: ast.literal_eval(x))
         paths['Correct'] = correct_pathways
         return paths
-    
+'''
