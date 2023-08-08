@@ -22,8 +22,8 @@ class Graph:
     # functions definitions
     def _get_number_of_occurences(self):
         self.num_occurences = pd.DataFrame(pd.DataFrame(pd.concat([self.pairs['source'], self.pairs['target']], axis=0)).value_counts())
-    
 
+    # main function to create graph    
     def create_graph(self, data: Data, pairs: pd.DataFrame):
         self.G = nx.from_pandas_edgelist(self.pairs, source='source', target='target', 
                                          create_using=nx.Graph()) 
@@ -32,12 +32,21 @@ class Graph:
         print('# nodes:', self.G.number_of_nodes(), "\n# edges:", self.G.number_of_edges())
 
         # set node attributes
+        community_df = self._get_community()
         for node in tqdm(self.G.nodes()):
             self.G.nodes[node]['mw'] = data.get_compound_by_id(node).mw
             self.G.nodes[node]['is_toxical'] = data.get_compound_by_id(node).is_toxic
             self.G.nodes[node]['is_cofactor'] = data.get_compound_by_id(node).is_cofactor
             self.G.nodes[node]['num_occurences'] = self.num_occurences.loc[node][0][0]
+            self.G.nodes[node]['community'] = community_df[community_df['compound'] == node]['community'].values[0]
+    
+    # transform the community detection into a DataFrame
+    def _get_community(self) -> pd.DataFrame:
+        communities = self._community_detection()
+        data = [{'community': idx, 'compound': cpd} for idx, community in enumerate(communities) for cpd in community]    
+        return pd.DataFrame(data)
 
+    # create or load saved communities (community detection)
     def _community_detection(self, weight=None):
         # check if file exists in folder
         try:
@@ -91,17 +100,20 @@ class Graph:
 
         return paths, idx
     
-    def calculate_edge_mol_weight(self, data: Data):
+    # function to check if cofactor
+    def _check_for_cofactor(self, cpd) -> bool:
+        return self.G.nodes[cpd]['is_cofactor']
+
+    def calculate_edge_mol_weight(self, data: Data, elim_cofacs=True) -> None:
         for edge in tqdm(self.G.edges()):
             a, b = edge[0], edge[1]
-            if data.get_compound_by_id(a).is_cofactor or data.get_compound_by_id(b).is_cofactor:
+            if elim_cofacs and (self._check_for_cofactor(a) or self._check_for_cofactor(b)):
                 self.G.edges[(a, b)]['mol_weight'] = np.inf
             else:
-                w_a = data.get_compound_by_id(a).mw
-                w_b = data.get_compound_by_id(b).mw
+                w_a = self.G.nodes[a]['mw']
+                w_b = self.G.nodes[b]['mw']
                 w = (np.abs(w_a - w_b) / (w_a + w_b + 1e-6))
                 self.G.edges[(a, b)]['mol_weight'] = w
-
 
     def calculate_smiles_similarity(self, data: Data):
         for edge in tqdm(self.G.edges()):
@@ -135,24 +147,3 @@ class Graph:
         paths['Pathway']  = paths['Pathway'].apply(lambda x: ast.literal_eval(x))
         paths['Correct'] = correct_pathways
         return paths
- 
-
-'''a
-    def validate(self, test_cases: pd.DataFrame, method: str):
-        correct_pathways = []
-        paths = []
-        for row in range(len(test_cases)):
-            source = test_cases['source'].iloc[row]
-            target = test_cases['target'].iloc[row]
-            correct_pathways.append((list(nx.shortest_path(self.G, source, target, weight=method)) == test_cases['paths_list'].iloc[row]))
-            paths.append(list(nx.shortest_path(self.G, source, target, weight=method)))
-
-        print(f'Correct pathway predictions: {correct_pathways.count(True)}')
-        print(f'Correct pathway predictions (%): {100 * correct_pathways.count(True) / len(correct_pathways)}')
-
-        # return the DataFrame with the resulted pathways and correct or not
-        paths = pd.DataFrame([str(p) for p in paths], columns=['Pathway'])
-        paths['Pathway']  = paths['Pathway'].apply(lambda x: ast.literal_eval(x))
-        paths['Correct'] = correct_pathways
-        return paths
-'''
