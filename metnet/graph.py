@@ -12,10 +12,11 @@ from rdkit import DataStructs
 from networkx.algorithms.community import greedy_modularity_communities
 
 class Graph:
-    def __init__(self, pairs: pd.DataFrame):
+    def __init__(self, pairs: pd.DataFrame, length=10):
         self.num_occurences = None # # number of times a metabolite appears on pairs dataset
         self.G = None # Graph structure
         self.pairs = pairs
+        self.length = length
 
         self._get_number_of_occurences()
 
@@ -59,8 +60,8 @@ class Graph:
                 pickle.dump(communities, f)
             return communities
 
-    def shortest_simple_paths(self, src, trg, weight=None, length=10):
-        return list(islice(nx.shortest_simple_paths(self.G, source=src, target=trg, weight=weight), length))
+    def shortest_simple_paths(self, src, trg, weight=None):
+        return list(islice(nx.shortest_simple_paths(self.G, source=src, target=trg, weight=weight), self.length))
 
     # def to check if we are passing from a reaction twice
     def _reaction_doubling(self, path: list) -> bool:
@@ -80,9 +81,11 @@ class Graph:
         paths = [path for path in paths if not self._reaction_doubling(path)]
         
         # select path with max smiles similarity
-        smiles_sim = []
+        # count number of community changes in pathway
+        smiles_sim, comm_changes = [], []
         for p in paths:
             sum = 0
+            chg = 0  # community changes per path
             compound_list = p
             for i in range(len(compound_list)-1):
                 cpd_a = compound_list[i]
@@ -90,15 +93,20 @@ class Graph:
                 sum += self.G.edges[(cpd_a, cpd_b)]['smiles_similarity']
                 if self.G.edges[(cpd_a, cpd_b)]['smiles_similarity'] == 0:
                     sum += self.G.edges[(cpd_b, cpd_a)]['smiles_similarity']
-            
+                if self.G.nodes[cpd_a]['community'] != self.G.nodes[cpd_b]['community']:
+                    chg += 1
+
             smiles_sim.append(sum)
+            comm_changes.append(chg)
         
         try:
-            idx = (smiles_sim.index(min(smiles_sim)))
+            idx_smi = (smiles_sim.index(min(smiles_sim)))
+            idx_com = (comm_changes.index(min(comm_changes)))
         except ValueError:
-            idx = None
+            idx_smi = None
+            idx_com = None
 
-        return paths, idx
+        return paths, idx_smi, idx_com
     
     def calculate_edge_mol_weight(self, data: Data):
         for edge in tqdm(self.G.edges()):
@@ -128,9 +136,9 @@ class Graph:
         for row in tqdm(range(len(test_cases))):
             source = test_cases['source'].iloc[row]
             target = test_cases['target'].iloc[row]
-            pred_path, idx = self.constrained_shortest_path(source, target, weight=method)
+            pred_path, idx_smi, idx_com = self.constrained_shortest_path(source, target, weight=method)
             try:
-                pred_path = pred_path[idx]
+                pred_path = pred_path[idx_smi]
             except TypeError:
                 pass
             correct_pathways.append((pred_path == test_cases['paths_list'].iloc[row]))
