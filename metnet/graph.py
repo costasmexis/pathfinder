@@ -22,8 +22,8 @@ class Graph:
     # functions definitions
     def _get_number_of_occurences(self):
         self.num_occurences = pd.DataFrame(pd.DataFrame(pd.concat([self.pairs['source'], self.pairs['target']], axis=0)).value_counts())
+    
 
-    # main function to create graph    
     def create_graph(self, data: Data, pairs: pd.DataFrame):
         self.G = nx.from_pandas_edgelist(self.pairs, source='source', target='target', 
                                          create_using=nx.Graph()) 
@@ -100,20 +100,17 @@ class Graph:
 
         return paths, idx
     
-    # function to check if cofactor
-    def _check_for_cofactor(self, cpd) -> bool:
-        return self.G.nodes[cpd]['is_cofactor']
-
-    def calculate_edge_mol_weight(self, data: Data, elim_cofacs=True) -> None:
+    def calculate_edge_mol_weight(self, data: Data):
         for edge in tqdm(self.G.edges()):
             a, b = edge[0], edge[1]
-            if elim_cofacs and (self._check_for_cofactor(a) or self._check_for_cofactor(b)):
-                self.G.edges[(a, b)]['mol_weight'] = np.inf
+            if data.get_compound_by_id(a).is_cofactor or data.get_compound_by_id(b).is_cofactor:
+                self.G.edges[(a, b)]['mol_weight'] = 10 # np.inf
             else:
-                w_a = self.G.nodes[a]['mw']
-                w_b = self.G.nodes[b]['mw']
+                w_a = data.get_compound_by_id(a).mw
+                w_b = data.get_compound_by_id(b).mw
                 w = (np.abs(w_a - w_b) / (w_a + w_b + 1e-6))
                 self.G.edges[(a, b)]['mol_weight'] = w
+
 
     def calculate_smiles_similarity(self, data: Data):
         for edge in tqdm(self.G.edges()):
