@@ -111,7 +111,7 @@ class Graph:
         if len(paths) == 0:
             print(f'***** No path found between {src} and {trg} *****')
 
-        return paths, smiles_sim, idx_smi, comm_changes, idx_com
+        return paths, idx_smi, idx_com
     
     def calculate_edge_mol_weight(self, data: Data):
         for edge in tqdm(self.G.edges()):
