@@ -83,7 +83,7 @@ class Graph:
         smiles_sim, comm_changes = [], []
         for p in paths:
             if len(p) == 2: 
-                print('Path with length 2', p)
+                print('***** Path with length 2', p, '*****')
                 continue
             sum = 0
             chg = 0  # community changes per path
@@ -107,7 +107,11 @@ class Graph:
             idx_smi = None
             idx_com = None
 
-        return paths, idx_smi, idx_com
+        ''' check if no path is found '''
+        if len(paths) == 0:
+            print(f'***** No path found between {src} and {trg} *****')
+
+        return paths, smiles_sim, idx_smi, comm_changes, idx_com
     
     def calculate_edge_mol_weight(self, data: Data):
         for edge in tqdm(self.G.edges()):
