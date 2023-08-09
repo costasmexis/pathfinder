@@ -24,10 +24,8 @@ class Graph:
     def _get_number_of_occurences(self):
         self.num_occurences = pd.DataFrame(pd.DataFrame(pd.concat([self.pairs['source'], self.pairs['target']], axis=0)).value_counts())
     
-
     def create_graph(self, data: Data, pairs: pd.DataFrame):
-        self.G = nx.from_pandas_edgelist(self.pairs, source='source', target='target', 
-                                         create_using=nx.Graph()) 
+        self.G = nx.from_pandas_edgelist(self.pairs, source='source', target='target', create_using=nx.Graph()) 
         self_loops = list(nx.selfloop_edges(self.G))
         self.G.remove_edges_from(self_loops)
         print('# nodes:', self.G.number_of_nodes(), "\n# edges:", self.G.number_of_edges())
@@ -84,6 +82,9 @@ class Graph:
         # count number of community changes in pathway
         smiles_sim, comm_changes = [], []
         for p in paths:
+            if len(p) == 2: 
+                print('Path with length 2', p)
+                continue
             sum = 0
             chg = 0  # community changes per path
             compound_list = p
@@ -152,3 +153,7 @@ class Graph:
         paths['Pathway']  = paths['Pathway'].apply(lambda x: ast.literal_eval(x))
         paths['Correct'] = correct_pathways
         return paths
+
+    ''' check if a node exist in networkx graph'''
+    def node_exists(self, node):
+        return node in self.G.nodes()
