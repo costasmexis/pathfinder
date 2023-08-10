@@ -74,9 +74,10 @@ class Graph:
         rxns_list = list(chain.from_iterable(rxns_list))
         return len(rxns_list) != len(set(rxns_list))
     
-    def constrained_shortest_path(self, src, trg, weight=None) -> list:
+    def constrained_shortest_path(self, src, trg, weight=None, rxn_doubling=True) -> list:
         paths = self.shortest_simple_paths(src, trg, weight=weight)
-        paths = [path for path in paths if not self._reaction_doubling(path)]
+        if rxn_doubling:
+            paths = [path for path in paths if not self._reaction_doubling(path)]
         
         # select path with max smiles similarity
         # count number of community changes in pathway
@@ -110,6 +111,7 @@ class Graph:
         ''' check if no path is found '''
         if len(paths) == 0:
             print(f'***** No path found between {src} and {trg} *****')
+            paths, idx_smi, idx_com = self.constrained_shortest_path(src, trg, weight=weight, rxn_doubling=False)
 
         return paths, idx_smi, idx_com
     
