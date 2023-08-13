@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import pickle
+import requests
+import re
 import networkx as nx
 from tqdm import tqdm
 from data import Data
@@ -111,6 +113,7 @@ class Graph:
         ''' check if no path is found '''
         if len(paths) == 0:
             print(f'***** No path found between {src} and {trg} *****')
+            # if no path is found, re-do constrained shortes path without chekcing for double reactions
             paths, idx_smi, idx_com = self.constrained_shortest_path(src, trg, weight=weight, rxn_doubling=False)
 
         return paths, idx_smi, idx_com
@@ -159,6 +162,30 @@ class Graph:
         paths['Pathway']  = paths['Pathway'].apply(lambda x: ast.literal_eval(x))
         paths['Correct'] = correct_pathways
         return paths
+
+    ''' KEGG compound to BIGG compound '''
+    def kegg_to_bigg_compound(self, kegg_id: str) -> str:
+        response = requests.post(
+            'http://bigg.ucsd.edu/advanced_search_external_id_results',
+            data={'database_source': 'kegg.compound', 'query':kegg_id}
+        )
+
+        try:
+            return re.search(r'/models/universal/metabolites/([^"]+)', response.text).group(1)
+        except AttributeError:
+            return 'Not found'
+
+    ''' KEGG reaction to BIGG reaction '''
+    def kegg_to_bigg_reaction(self, kegg_id: str) -> str:
+        response = requests.post(
+            'http://bigg.ucsd.edu/advanced_search_external_id_results',
+            data={'database_source': 'kegg.reaction', 'query':kegg_id}
+        )
+
+        try:
+            return re.search(r'/models/universal/reactions/([^"]+)', response.text).group(1)
+        except AttributeError:
+            return 'Not found'
 
     ''' check if a node exist in networkx graph'''
     def node_exists(self, node):
