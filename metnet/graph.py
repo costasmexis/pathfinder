@@ -40,7 +40,7 @@ class Graph:
             self.G.nodes[node]['is_cofactor'] = data.get_compound_by_id(node).is_cofactor
             self.G.nodes[node]['num_occurences'] = self.num_occurences.loc[node][0][0]
             self.G.nodes[node]['community'] = community_df[community_df['compound'] == node]['community'].values[0]
-    
+
     # transform the community detection into a DataFrame
     def _get_community(self) -> pd.DataFrame:
         communities = self._community_detection()
@@ -112,7 +112,7 @@ class Graph:
 
         ''' check if no path is found '''
         if len(paths) == 0:
-            print(f'***** No path found between {src} and {trg} *****')
+            # print(f'***** No path found between {src} and {trg} *****')
             # if no path is found, re-do constrained shortes path without chekcing for double reactions
             paths, idx_smi, idx_com = self.constrained_shortest_path(src, trg, weight=weight, rxn_doubling=False)
 
@@ -191,4 +191,13 @@ class Graph:
     def node_exists(self, node):
         return node in self.G.nodes()
     
+    def get_edges(self):
+        return self.G.edges(data=True)
     
+    ''' get reaction by compounds '''
+    def get_reaction_by_compounds(self, cpd_a, cpd_b):
+        rxns = self.pairs[(self.pairs['source'] == cpd_a) & (self.pairs['target'] == cpd_b)]['Reaction'].values
+        if len(rxns) == 0:
+            rxns = self.pairs[(self.pairs['source'] == cpd_b) & (self.pairs['target'] == cpd_a)]['Reaction'].values
+        return rxns
+        
