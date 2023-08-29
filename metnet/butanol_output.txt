@@ -1,0 +1,60 @@
+['C00084', 'C00024', 'C00136', 'C01412', 'C06142']
+['acald', 'accoa', 'btcoa', 'btal', '1btol']
+[['R00228'], ['R01179'], ['R01172', 'R01173'], ['R03544', 'R03545']]
+[['ACALD'], ['Not found'], ['BNORh', 'Not found'], ['ALCD4', 'ALCD4y']]
+------------------
+['C00024', 'C00136', 'C01412', 'C06142']
+['accoa', 'btcoa', 'btal', '1btol']
+[['R01179'], ['R01172', 'R01173'], ['R03544', 'R03545']]
+[['Not found'], ['BTCOARx', 'Not found'], ['BTS', 'ALCD4y']]
+------------------
+['C00074', 'C00111', 'C20960', 'C00024', 'C00136', 'C01412', 'C06142']
+['pep', 'dhap', 'Not found', 'accoa', 'btcoa', 'btal', 'btoh']
+[['R01012'], ['R11182'], ['R11182'], ['R01179'], ['R01172', 'R01173'], ['R03544', 'R03545']]
+[['DHAPT'], ['Not found'], ['Not found'], ['Not found'], ['BNORh', 'Not found'], ['BTS', 'ALCD4y']]
+------------------
+['C00022', 'C00024', 'C00136', 'C01412', 'C06142']
+['pyr', 'accoa', 'btcoa', 'btal', '1btol']
+[['R00209', 'R00210', 'R00211', 'R00353', 'R10866'], ['R01179'], ['R01172', 'R01173'], ['R03544', 'R03545']]
+[['PDH', 'Not found', 'Not found', 'Not found', 'PFOR'], ['Not found'], ['BNORh', 'Not found'], ['BTS', 'ALCD4y']]
+------------------
+['C00497', 'C20747', 'C00091', 'C00332', 'C00136', 'C01412', 'C06142']
+['mal__D', 'Not found', 'succoa', 'aacoa', 'btcoa', 'btal', '1btol']
+[['R10641'], ['R10641'], ['R00410'], ['R01365'], ['R01172', 'R01173'], ['R03544', 'R03545']]
+[['Not found'], ['Not found'], ['OCOAT1'], ['Not found'], ['BNORh', 'Not found'], ['ALCD4', 'ALCD4y']]
+------------------
+['C00149', 'C00024', 'C00136', 'C01412', 'C06142']
+['mal__L', 'accoa', 'btcoa', 'btal', '1btol']
+[['R00472'], ['R01179'], ['R01172', 'R01173'], ['R03544', 'R03545']]
+[['MALSh'], ['Not found'], ['BTCOARx', 'Not found'], ['ALCD4', 'ALCD4y']]
+------------------
+['C00122', 'C00149', 'C00024', 'C00136', 'C01412', 'C06142']
+['fum', 'mal__L', 'accoa', 'btcoa', 'btal', '1btol']
+[['R01082'], ['R00472'], ['R01179'], ['R01172', 'R01173'], ['R03544', 'R03545']]
+[['FUM'], ['MALS'], ['Not found'], ['BTCOARx', 'Not found'], ['ALCD4', 'BTS_nadph']]
+------------------
+['C00042', 'C00149', 'C00024', 'C00136', 'C01412', 'C06142']
+['succ', 'mal__L', 'accoa', 'btcoa', 'btal', '1btol']
+[['R00406'], ['R00472'], ['R01179'], ['R01172', 'R01173'], ['R03544', 'R03545']]
+[['Not found'], ['MALS'], ['Not found'], ['BTCOARx', 'Not found'], ['ALCD4', 'ALCD4y']]
+------------------
+['C00036', 'C00083', 'C00332', 'C00136', 'C01412', 'C06142']
+['oaa', 'malcoa', 'aacoa', 'btcoa', 'btal', '1btol']
+[['R00353'], ['R09527'], ['R01365'], ['R01172', 'R01173'], ['R03544', 'R03545']]
+[['Not found'], ['Not found'], ['Not found'], ['BTCOARx', 'Not found'], ['ALCD4', 'ALCD4y']]
+------------------
+['C00091', 'C00332', 'C00136', 'C01412', 'C06142']
+['succoa', 'aacoa', 'btcoa', 'btal', '1btol']
+[['R00410'], ['R01365'], ['R01172', 'R01173'], ['R03544', 'R03545']]
+[['OCOAT1'], ['Not found'], ['BNORh', 'Not found'], ['BTS', 'BTS_nadph']]
+------------------
+['C00111', 'C20960', 'C00024', 'C00136', 'C01412', 'C06142']
+['dhap', 'Not found', 'accoa', 'btcoa', 'btal', 'btoh']
+[['R11182'], ['R11182'], ['R01179'], ['R01172', 'R01173'], ['R03544', 'R03545']]
+[['Not found'], ['Not found'], ['Not found'], ['BTCOARx', 'Not found'], ['ALCD4', 'ALCD4y']]
+------------------
+['C00158', 'C00024', 'C00136', 'C01412', 'C06142']
+['cit', 'accoa', 'btcoa', 'btal', 'btoh']
+[['R00351', 'R00352'], ['R01179'], ['R01172', 'R01173'], ['R03544', 'R03545']]
+[['CS', 'ACITL'], ['Not found'], ['BNORh', 'Not found'], ['ALCD4', 'ALCD4y']]
+------------------
