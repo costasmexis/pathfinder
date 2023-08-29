@@ -190,3 +190,5 @@ class Graph:
     ''' check if a node exist in networkx graph'''
     def node_exists(self, node):
         return node in self.G.nodes()
+    
+    
