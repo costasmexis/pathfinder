@@ -134,9 +134,43 @@ def main():
     pairs['Reaction'] = reacs
     pairs.to_csv('data/pairs_final.csv')
 
+''' function to preprocess the main pairs dataset '''
+def preprocess_nicepath_pairs(df: pd.DataFrame) -> pd.DataFrame:
+    # drop the unnecessary columns
+    df.drop(['CAR', 'KEGG_reactions'], axis=1, inplace=True)
+    # split by '_' the Reactant_pair column and reconstruct the pairs by sorting them alphabetically
+    df['Reactant_pair'] = df['Reactant_pair'].apply(lambda x: '_'.join(sorted(x.split('_'))))
+
+    return df
+                 
+
+def main_pairs():
+    # load the .tsv data containing the main pairs info
+    main_df = pd.read_csv('data/original/Main_RPAIRS_KEGG.tsv', sep='\t')
+    main_df = preprocess_nicepath_pairs(main_df)
+    pairs_df = pd.read_csv('data/pairs_final.csv', index_col=0)
+    pairs_df['Pairs'] = pairs_df['Pairs'].apply(lambda x: '_'.join(sorted(x.split('_'))))
+
+    print(main_df.shape, pairs_df.shape)
+
+    # merge two dfs based on a common column with different name in each df
+    pairs_df = pd.merge(pairs_df, main_df, left_on='Pairs', 
+                        right_on='Reactant_pair', how='left')
+    # drop 'Reactant_pair' column
+    pairs_df.drop('Reactant_pair', axis=1, inplace=True)
+    
+    # in 'RPAIR_main' column, replace True with 1, False with 0 and NaN with 2
+    pairs_df['RPAIR_main'] = pairs_df['RPAIR_main'].apply(lambda x: 1 if x == True else 0 if x == False else 2)
+
+    print(pairs_df.shape)
+
+    return pairs_df
+
 if __name__ == '__main__':
     # execute main() only if 'data/paris_final.csv' does not exist
     if not os.path.exists('data/pairs_final.csv'):
         main()
     else:
         print('Preproccessing already done...')
+        df = main_pairs()
+        df.to_csv('data/pairs_final_RPAIRS.csv')

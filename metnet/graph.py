@@ -21,8 +21,15 @@ class Graph:
         self.length = length
 
         self._get_number_of_occurences()
+        self._pairs_preprocessing()
 
-    # functions definitions
+    ''' functions definitions '''
+
+    def _pairs_preprocessing(self):
+        # drop rows where RPAIRS_main is 0
+        self.pairs = self.pairs[self.pairs['RPAIR_main'] != 0]
+        
+
     def _get_number_of_occurences(self):
         self.num_occurences = pd.DataFrame(pd.DataFrame(pd.concat([self.pairs['source'], self.pairs['target']], axis=0)).value_counts())
     
