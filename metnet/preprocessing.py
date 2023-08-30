@@ -6,6 +6,7 @@ from tqdm import tqdm
 import json
 from itertools import product
 import re
+import os
 
 def extract_elements(df, column_name):
     '''
@@ -134,4 +135,8 @@ def main():
     pairs.to_csv('data/pairs_final.csv')
 
 if __name__ == '__main__':
-    main()
+    # execute main() only if 'data/paris_final.csv' does not exist
+    if not os.path.exists('data/pairs_final.csv'):
+        main()
+    else:
+        print('Preproccessing already done...')
