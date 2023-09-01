@@ -18,18 +18,16 @@ class Graph:
         self.num_occurences = None # # number of times a metabolite appears on pairs dataset
         self.G = None # Graph structure
         self.pairs = pairs
-        self.length = length
+        self.length = length # length of the shortest path
 
         self._get_number_of_occurences()
         self._pairs_preprocessing()
 
     ''' functions definitions '''
-
+    # drop rows where RPAIRS_main is 0; keeps only the main pairs
     def _pairs_preprocessing(self):
-        # drop rows where RPAIRS_main is 0
         self.pairs = self.pairs[self.pairs['RPAIR_main'] != 0]
         
-
     def _get_number_of_occurences(self):
         self.num_occurences = pd.DataFrame(pd.DataFrame(pd.concat([self.pairs['source'], self.pairs['target']], axis=0)).value_counts())
     
@@ -83,7 +81,7 @@ class Graph:
         rxns_list = list(chain.from_iterable(rxns_list))
         return len(rxns_list) != len(set(rxns_list))
     
-    def constrained_shortest_path(self, src, trg, weight=None, rxn_doubling=True) -> list:
+    def constrained_shortest_path(self, src, trg, weight=None, rxn_doubling=True):
         paths = self.shortest_simple_paths(src, trg, weight=weight)
         if rxn_doubling:
             paths = [path for path in paths if not self._reaction_doubling(path)]
@@ -109,10 +107,10 @@ class Graph:
 
             smiles_sim.append(sum)
             comm_changes.append(chg)
-        
+
         try:
-            idx_smi = (smiles_sim.index(min(smiles_sim)))
-            idx_com = (comm_changes.index(min(comm_changes)))
+            idx_smi = pd.DataFrame(smiles_sim).sort_values(by=0, ignore_index=False).index.values
+            idx_com = pd.DataFrame(comm_changes).sort_values(by=0, ignore_index=False).index.values
         except ValueError:
             idx_smi = None
             idx_com = None
@@ -135,7 +133,6 @@ class Graph:
                 w_b = data.get_compound_by_id(b).mw
                 w = (np.abs(w_a - w_b) / (w_a + w_b + 1e-6))
                 self.G.edges[(a, b)]['mol_weight'] = w
-
 
     def calculate_smiles_similarity(self, data: Data):
         for edge in tqdm(self.G.edges()):
