@@ -43,7 +43,7 @@ class Graph:
             self.G.nodes[node]['mw'] = data.get_compound_by_id(node).mw
             self.G.nodes[node]['is_toxical'] = data.get_compound_by_id(node).is_toxic
             self.G.nodes[node]['is_cofactor'] = data.get_compound_by_id(node).is_cofactor
-            self.G.nodes[node]['num_occurences'] = self.num_occurences.loc[node][0][0]
+            self.G.nodes[node]['num_occurences'] = self.num_occurences.loc[node].values[0]
             self.G.nodes[node]['community'] = community_df[community_df['compound'] == node]['community'].values[0]
 
     # transform the community detection into a DataFrame
@@ -167,36 +167,9 @@ class Graph:
         paths['Correct'] = correct_pathways
         return paths
 
-    ''' KEGG compound to BIGG compound '''
-    def kegg_to_bigg_compound(self, kegg_id: str) -> str:
-        response = requests.post(
-            'http://bigg.ucsd.edu/advanced_search_external_id_results',
-            data={'database_source': 'kegg.compound', 'query':kegg_id}
-        )
-
-        try:
-            return re.search(r'/models/universal/metabolites/([^"]+)', response.text).group(1)
-        except AttributeError:
-            return 'Not found'
-
-    ''' KEGG reaction to BIGG reaction '''
-    def kegg_to_bigg_reaction(self, kegg_id: str) -> str:
-        response = requests.post(
-            'http://bigg.ucsd.edu/advanced_search_external_id_results',
-            data={'database_source': 'kegg.reaction', 'query':kegg_id}
-        )
-
-        try:
-            return re.search(r'/models/universal/reactions/([^"]+)', response.text).group(1)
-        except AttributeError:
-            return 'Not found'
-
     ''' check if a node exist in networkx graph'''
     def node_exists(self, node):
         return node in self.G.nodes()
-    
-    def get_edges(self):
-        return self.G.edges(data=True)
     
     ''' get reaction by compounds '''
     def get_reaction_by_compounds(self, cpd_a, cpd_b):
@@ -204,4 +177,4 @@ class Graph:
         if len(rxns) == 0:
             rxns = self.pairs[(self.pairs['source'] == cpd_b) & (self.pairs['target'] == cpd_a)]['Reaction'].values
         return rxns
-        
+    
