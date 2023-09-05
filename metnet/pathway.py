@@ -25,7 +25,7 @@ class Pathway:
 
     def print_pathway(self, with_reactions=False, to_bigg=False):
         print(f'Pathway from {self.source} to {self.target}:')
-        for j in range(self.graph.length):
+        for j in range(len(self.idx_smi)):
             path = self.pred_paths[self.idx_smi[j]]
             print(path)
 
