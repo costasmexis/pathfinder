@@ -159,4 +159,4 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-/home/WUR/g0012069/pathfinder/metnet/data/pairs_final_RPAIRS_smiles.csv
+metnet/data/pairs_final_RPAIRS_smiles.csv
