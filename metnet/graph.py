@@ -13,6 +13,8 @@ from rdkit import Chem
 from rdkit import DataStructs
 from networkx.algorithms.community import greedy_modularity_communities
 
+RPAIRS_COLUMNS = 'RPAIR_main_pred'
+
 class Graph:
     def __init__(self, pairs: pd.DataFrame, length=10):
         self.num_occurences = None # # number of times a metabolite appears on pairs dataset
@@ -26,7 +28,7 @@ class Graph:
     ''' functions definitions '''
     # drop rows where RPAIRS_main is 0; keeps only the main pairs
     def _pairs_preprocessing(self):
-        self.pairs = self.pairs[self.pairs['RPAIR_main'] != 0]
+        self.pairs = self.pairs[self.pairs[RPAIRS_COLUMNS] != 0]
         
     def _get_number_of_occurences(self):
         self.num_occurences = pd.DataFrame(pd.DataFrame(pd.concat([self.pairs['source'], self.pairs['target']], axis=0)).value_counts())
