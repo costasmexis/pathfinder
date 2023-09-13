@@ -84,7 +84,12 @@ class Graph:
         return len(rxns_list) != len(set(rxns_list))
     
     def constrained_shortest_path(self, src, trg, weight=None, rxn_doubling=True):
-        paths = self.shortest_simple_paths(src, trg, weight=weight)
+        try:
+            paths = self.shortest_simple_paths(src, trg, weight=weight)
+        except nx.NetworkXNoPath:
+            print(f'***** No path found between {src} and {trg} *****')
+            return [], None, None
+        
         if rxn_doubling:
             paths = [path for path in paths if not self._reaction_doubling(path)]
         
@@ -152,7 +157,11 @@ class Graph:
         for row in tqdm(range(len(test_cases))):
             source = test_cases['source'].iloc[row]
             target = test_cases['target'].iloc[row]
-            pred_path, idx_smi, idx_com = self.constrained_shortest_path(source, target, weight=method)
+            try:
+                pred_path, idx_smi, idx_com = self.constrained_shortest_path(source, target, weight=method)
+            except nx.NodeNotFound:
+                print(f'***** Node not found for {source} or {target} *****')
+                pred_path, idx_smi, idx_com = [], None, None
             try:
                 pred_path = pred_path[idx_smi]
             except TypeError:
