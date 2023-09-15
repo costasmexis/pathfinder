@@ -167,7 +167,6 @@ class Graph:
         return rxns
 
 
-
     # *************************** #
     ''' TODO: Remove this function 
     and add it to the Pathway class'''
