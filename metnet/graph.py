@@ -32,6 +32,9 @@ class Graph:
         
     def _get_number_of_occurences(self):
         self.num_occurences = pd.DataFrame(pd.DataFrame(pd.concat([self.pairs['source'], self.pairs['target']], axis=0)).value_counts())
+        self.num_occurences.columns = ['num_occurences']
+        self.num_occurences.reset_index(inplace=True)
+        self.num_occurences.columns = ['compound', 'num_occurences']
     
     def create_graph(self, data: Data, pairs: pd.DataFrame):
         self.G = nx.from_pandas_edgelist(self.pairs, source='source', target='target', create_using=nx.Graph()) 
@@ -42,10 +45,11 @@ class Graph:
         # set node attributes
         community_df = self._get_community()
         for node in tqdm(self.G.nodes()):
+            self.G.nodes[node]['name'] = data.get_compound_by_id(node).name
             self.G.nodes[node]['mw'] = data.get_compound_by_id(node).mw
             self.G.nodes[node]['is_toxical'] = data.get_compound_by_id(node).is_toxic
             self.G.nodes[node]['is_cofactor'] = data.get_compound_by_id(node).is_cofactor
-            self.G.nodes[node]['num_occurences'] = self.num_occurences.loc[node].values[0]
+            self.G.nodes[node]['num_occurences'] = self.num_occurences[self.num_occurences['compound'] == node]['num_occurences']
             self.G.nodes[node]['community'] = community_df[community_df['compound'] == node]['community'].values[0]
 
     # transform the community detection into a DataFrame
@@ -151,6 +155,22 @@ class Graph:
             s = DataStructs.FingerprintSimilarity(fs[0], fs[1])
             self.G.edges[(a, b)]['smiles_similarity'] = 1-s
 
+    ''' check if a node exist in networkx graph'''
+    def node_exists(self, node):
+        return node in self.G.nodes()
+    
+    ''' get reaction by compounds '''
+    def get_reaction_by_compounds(self, cpd_a, cpd_b):
+        rxns = self.pairs[(self.pairs['source'] == cpd_a) & (self.pairs['target'] == cpd_b)]['Reaction'].values
+        if len(rxns) == 0:
+            rxns = self.pairs[(self.pairs['source'] == cpd_b) & (self.pairs['target'] == cpd_a)]['Reaction'].values
+        return rxns
+
+
+
+    # *************************** #
+    ''' TODO: Remove this function 
+    and add it to the Pathway class'''
     def validate(self, test_cases: pd.DataFrame, method: str):
         correct_pathways = []
         paths = []
@@ -177,15 +197,3 @@ class Graph:
         paths['Pathway']  = paths['Pathway'].apply(lambda x: ast.literal_eval(x))
         paths['Correct'] = correct_pathways
         return paths
-
-    ''' check if a node exist in networkx graph'''
-    def node_exists(self, node):
-        return node in self.G.nodes()
-    
-    ''' get reaction by compounds '''
-    def get_reaction_by_compounds(self, cpd_a, cpd_b):
-        rxns = self.pairs[(self.pairs['source'] == cpd_a) & (self.pairs['target'] == cpd_b)]['Reaction'].values
-        if len(rxns) == 0:
-            rxns = self.pairs[(self.pairs['source'] == cpd_b) & (self.pairs['target'] == cpd_a)]['Reaction'].values
-        return rxns
-    
