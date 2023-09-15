@@ -47,7 +47,7 @@ class Graph:
         for node in tqdm(self.G.nodes()):
             self.G.nodes[node]['name'] = data.get_compound_by_id(node).name
             self.G.nodes[node]['mw'] = data.get_compound_by_id(node).mw
-            self.G.nodes[node]['is_toxical'] = data.get_compound_by_id(node).is_toxic
+            # self.G.nodes[node]['is_toxic'] = data.get_compound_by_id(node).is_toxic
             self.G.nodes[node]['is_cofactor'] = data.get_compound_by_id(node).is_cofactor
             self.G.nodes[node]['num_occurences'] = self.num_occurences[self.num_occurences['compound'] == node]['num_occurences']
             self.G.nodes[node]['community'] = community_df[community_df['compound'] == node]['community'].values[0]
@@ -62,7 +62,7 @@ class Graph:
     def _community_detection(self, weight=None):
         # check if file exists in folder
         try:
-            with open('./data/communities.pkl', 'rb') as f:
+            with open('../data/communities.pkl', 'rb') as f:
                 communities = pickle.load(f)
                 return communities
         except FileNotFoundError:

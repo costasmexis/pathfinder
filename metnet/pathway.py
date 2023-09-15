@@ -87,7 +87,6 @@ class Pathway:
             return re.search(r'/models/universal/reactions/([^"]+)', response.text).group(1)
         except AttributeError:
             return 'Not found'    
-
-
+       
     def __str__(self):
         return f'Pathway from {self.source} to {self.target}'
