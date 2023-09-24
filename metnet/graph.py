@@ -125,6 +125,9 @@ class Graph:
         except ValueError:
             idx_smi = None
             idx_com = None
+        except KeyError:
+            idx_smi = None
+            idx_com = None
 
         ''' check if no path is found '''
         if len(paths) == 0:
@@ -176,15 +179,16 @@ class Graph:
         for row in tqdm(range(len(test_cases))):
             source = test_cases['source'].iloc[row]
             target = test_cases['target'].iloc[row]
+            print(f"Searching for pathway between {source} and {target}")
             try:
                 pred_path, idx_smi, idx_com = self.constrained_shortest_path(source, target, weight=method)
+                pred_path = pred_path[idx_smi[0]]
             except nx.NodeNotFound:
                 print(f'***** Node not found for {source} or {target} *****')
                 pred_path, idx_smi, idx_com = [], None, None
-            try:
-                pred_path = pred_path[idx_smi]
             except TypeError:
                 pass
+            
             correct_pathways.append((pred_path == test_cases['paths_list'].iloc[row]))
             paths.append(pred_path)
        

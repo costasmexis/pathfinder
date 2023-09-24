@@ -48,20 +48,15 @@ def get_fingerprint(smi):
     return np.array(fp)
 
 def main():
-        
     # read data from csv
-    cpds = pd.read_csv('../data/compounds_final.csv', index_col=0) # containing toxicity
-    rxns = pd.read_csv('../data/reactions_final.csv', index_col=0)
+    cpds = pd.read_csv('../data/compounds_final.csv', index_col=0) 
     pairs = pd.read_csv('../data/pairs_final_RPAIRS.csv', index_col=0)
-    cofactors = pd.read_csv('../data/original/cofactors_KEGG.csv')
 
-    # keep rows with RPAIR_main != 2
     df_train = pairs[pairs['RPAIR_main'] != 2]
     df_test = pairs[pairs['RPAIR_main'] == 2]
-    print(f'Shape of total dataset: {pairs.shape}')
-    print(f'Shape of train dataset: {df_train.shape}')
-    print(f'Shape of test dataset: {df_test.shape}')
-
+    print(f'Rows of dataset: {pairs.shape[0]}')
+    print(f'Rows of known RPAIR: {df_train.shape[0]}')
+    print(f'Rows of unknown RPAIR: {df_test.shape[0]}')
 
     pairs_smiles_list = []
     for row in tqdm(range(len(pairs))):
@@ -75,7 +70,7 @@ def main():
         target_smi = get_fingerprint(target_smi)
         
         # create the pair feature vector combining source and target
-        pair_smi = (source_smi + target_smi) / 2
+        pair_smi = source_smi + target_smi
         pairs_smiles_list.append(pair_smi)
 
     pairs_smiles_df = pd.DataFrame(pairs_smiles_list)
