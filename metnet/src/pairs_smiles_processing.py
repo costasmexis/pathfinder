@@ -3,6 +3,10 @@ import numpy as np
 import json
 import networkx as nx
 from tqdm import tqdm
+
+# Add folder to path
+import sys
+sys.path.append('../')
 from compound import Compound
 from reaction import Reaction
 from graph import Graph
@@ -46,10 +50,10 @@ def get_fingerprint(smi):
 def main():
         
     # read data from csv
-    cpds = pd.read_csv('../GNN_toxic/data/raw/compounds_final.csv', index_col=0) # containing toxicity
-    rxns = pd.read_csv('data/reactions_final.csv', index_col=0)
-    pairs = pd.read_csv('data/pairs_final_RPAIRS.csv', index_col=0)
-    cofactors = pd.read_csv('data/original/cofactors_KEGG.csv')
+    cpds = pd.read_csv('../data/compounds_final.csv', index_col=0) # containing toxicity
+    rxns = pd.read_csv('../data/reactions_final.csv', index_col=0)
+    pairs = pd.read_csv('../data/pairs_final_RPAIRS.csv', index_col=0)
+    cofactors = pd.read_csv('../data/original/cofactors_KEGG.csv')
 
     # keep rows with RPAIR_main != 2
     df_train = pairs[pairs['RPAIR_main'] != 2]
@@ -70,7 +74,8 @@ def main():
         source_smi = get_fingerprint(source_smi)
         target_smi = get_fingerprint(target_smi)
         
-        pair_smi = source_smi + target_smi
+        # create the pair feature vector combining source and target
+        pair_smi = (source_smi + target_smi) / 2
         pairs_smiles_list.append(pair_smi)
 
     pairs_smiles_df = pd.DataFrame(pairs_smiles_list)
@@ -78,7 +83,7 @@ def main():
     pairs_smiles_df['RPAIR_main'] = pairs['RPAIR_main'].values
 
     # save pairs_smiles_df to csv
-    pairs_smiles_df.to_csv('data/pairs_final_RPAIRS_smiles.csv')
+    pairs_smiles_df.to_csv('../data/pairs_final_RPAIRS_smiles.csv')
 
 if __name__ == '__main__':
     main()
