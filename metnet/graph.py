@@ -12,6 +12,7 @@ from itertools import chain
 from rdkit import Chem
 from rdkit import DataStructs
 from networkx.algorithms.community import greedy_modularity_communities
+import os
 
 RPAIRS_COLUMNS = 'RPAIR_main_pred'
 
@@ -64,12 +65,11 @@ class Graph:
         try:
             with open('../data/communities.pkl', 'rb') as f:
                 communities = pickle.load(f)
-                return communities
         except FileNotFoundError:
             communities = greedy_modularity_communities(self.G, weight=weight)
-            with open('./data/communities.pkl', 'wb') as f:
+            with open('../data/communities.pkl', 'wb') as f:
                 pickle.dump(communities, f)
-            return communities
+        return communities
 
     def shortest_simple_paths(self, src, trg, weight=None):
         return list(islice(nx.shortest_simple_paths(self.G, source=src, target=trg, weight=weight), self.length))

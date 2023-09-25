@@ -47,7 +47,7 @@ def get_fingerprint(smi):
     fp = Chem.RDKFingerprint(mol)
     return np.array(fp)
 
-def main():
+def main(method='sum'):
     # read data from csv
     cpds = pd.read_csv('../data/compounds_final.csv', index_col=0) 
     pairs = pd.read_csv('../data/pairs_final_RPAIRS.csv', index_col=0)
@@ -70,7 +70,11 @@ def main():
         target_smi = get_fingerprint(target_smi)
         
         # create the pair feature vector combining source and target
-        pair_smi = source_smi + target_smi
+        if method == 'sum':
+            pair_smi = source_smi + target_smi
+        elif method =='avg':
+            pair_smi = (source_smi + target_smi) / 2
+
         pairs_smiles_list.append(pair_smi)
 
     pairs_smiles_df = pd.DataFrame(pairs_smiles_list)
@@ -81,4 +85,4 @@ def main():
     pairs_smiles_df.to_csv('../data/pairs_final_RPAIRS_smiles.csv')
 
 if __name__ == '__main__':
-    main()
+    main(method='avg')
