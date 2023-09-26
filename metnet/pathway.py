@@ -14,6 +14,10 @@ class Pathway:
         self.pred_paths = None
         self.idx_smi = None
         self.idx_com = None
+
+        # Store signle paths (compound form, reaction form)
+        self.path_compound = None
+        self.path_reactions = None
     
     def initialize(self, source, target, graph):
         self.source = source
@@ -49,6 +53,11 @@ class Pathway:
         bigg_pathway = [self.kegg_to_bigg_compound(cpd) for cpd in kegg_pathway]
         return bigg_pathway
     
+    ''' Function to define self.path_compound and self.path_reactions given a single pathway '''
+    def single_pathway(self, path: list):
+        self.path_compound = path
+        self.path_reactions = self.get_pathway_reactions(path)
+
     ''' list of arrays to list of lists '''
     def _list_of_arrays_to_list_of_lists(self, l: list) -> list:
         return [list(x) for x in l]
