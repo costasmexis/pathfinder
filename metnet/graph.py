@@ -168,35 +168,3 @@ class Graph:
         if len(rxns) == 0:
             rxns = self.pairs[(self.pairs['source'] == cpd_b) & (self.pairs['target'] == cpd_a)]['Reaction'].values
         return rxns
-
-
-    # *************************** #
-    ''' TODO: Remove this function 
-    and add it to the Pathway class'''
-    def validate(self, test_cases: pd.DataFrame, method: str):
-        correct_pathways = []
-        paths = []
-        for row in tqdm(range(len(test_cases))):
-            source = test_cases['source'].iloc[row]
-            target = test_cases['target'].iloc[row]
-            print(f"Searching for pathway between {source} and {target}")
-            try:
-                pred_path, idx_smi, idx_com = self.constrained_shortest_path(source, target, weight=method)
-                pred_path = pred_path[idx_smi[0]]
-            except nx.NodeNotFound:
-                print(f'***** Node not found for {source} or {target} *****')
-                pred_path, idx_smi, idx_com = [], None, None
-            except TypeError:
-                pass
-            
-            correct_pathways.append((pred_path == test_cases['paths_list'].iloc[row]))
-            paths.append(pred_path)
-       
-        print(f'Correct pathway predictions: {correct_pathways.count(True)}')
-        print(f'Correct pathway predictions (%): {100 * correct_pathways.count(True) / len(correct_pathways)}')
-
-        # return the DataFrame with the resulted pathways and correct or not
-        paths = pd.DataFrame([str(p) for p in paths], columns=['Pathway'])
-        paths['Pathway']  = paths['Pathway'].apply(lambda x: ast.literal_eval(x))
-        paths['Correct'] = correct_pathways
-        return paths

@@ -44,7 +44,10 @@ class Pathway:
                     print(bigg_reactions)
 
                 print('\n')
-            
+    
+    def get_reaction_formula(self, rxn_id: str) -> str:
+        pass
+
     def kegg_to_bigg_pathway(self, kegg_pathway: list) -> list:
         bigg_pathway = [self.kegg_to_bigg_compound(cpd) for cpd in kegg_pathway]
         return bigg_pathway
