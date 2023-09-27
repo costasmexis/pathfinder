@@ -57,6 +57,7 @@ class Pathway:
     def single_pathway(self, path: list):
         self.path_compound = path
         self.path_reactions = self.get_pathway_reactions(path)
+        return self.path_compound, self.path_reactions
 
     ''' list of arrays to list of lists '''
     def _list_of_arrays_to_list_of_lists(self, l: list) -> list:

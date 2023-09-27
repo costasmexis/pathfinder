@@ -61,4 +61,10 @@ def create_reaction(data: Data, rxns: pd.DataFrame):
         data.add_element('reaction', reaction)
     return data
 
+# Given 2 lists, check if the elements of the first list are in the second list
+def check_list(l1: list, l2: list) -> bool:
+    for i in l1:
+        if i not in l2:
+            return False
+    return True
 

@@ -23,6 +23,7 @@ class Microorganism:
 
     def _create_metabolites_df(self):
         metabolites_kegg = []
+        metabolites_seed = []
         compartments = []
         for m in self.metabolites_id:
             try:
@@ -31,11 +32,20 @@ class Microorganism:
             except KeyError:
                 kegg_id = "NA"
                 metabolites_kegg.append(kegg_id)
+            try:
+                seed_id = self.cobra_model.metabolites.get_by_id(m)._annotation['seed.compound']
+                metabolites_seed.append(seed_id[0])
+            except KeyError:
+                seed_id = "NA"
+                metabolites_seed.append(seed_id)  
             comp = self.cobra_model.metabolites.get_by_id(m).compartment
             compartments.append(comp)
 
         # Create dataframe with metabolites and their KEGG ID
-        self.metabolites_df = pd.DataFrame({"metabolites": self.metabolites_id, "kegg": metabolites_kegg, "compartment": compartments})
+        self.metabolites_df = pd.DataFrame({"metabolites": self.metabolites_id, 
+                                            "kegg": metabolites_kegg, 
+                                            "seed": metabolites_seed,
+                                            "compartment": compartments})
 
     def _create_reactions_df(self):
         reactions_kegg = []
