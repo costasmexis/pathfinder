@@ -20,7 +20,6 @@ class Microorganism:
         self._create_metabolites_df()
         self._create_reactions_df()
 
-
     def _create_metabolites_df(self):
         metabolites_kegg = []
         metabolites_seed = []
@@ -62,3 +61,7 @@ class Microorganism:
         self.reactions_df = pd.DataFrame({"reactions": self.reactions_id, "kegg": reactions_kegg})
 
 
+    def __str__(self) -> str:
+        return f"{self.cobra_model._id} ({len(self.metabolites_id)} metabolites, {len(self.reactions_id)} reactions)"
+    
+    
