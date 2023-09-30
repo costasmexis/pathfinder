@@ -170,18 +170,18 @@ class Pathway:
             if verbose:
                 print(f"The selected pathway reactions are: {self.selected_pathway_reactions}")        
 
-    def _str_map(self, string, df: pd.DataFrame) -> str:
+    def _str_map(self, string, df: pd.DataFrame, col = 'metabolites') -> str:
         # Replace <=> with --> in string
         string = string.replace('<=>', '-->')
         for i in range(len(df)):
-            string = string.replace(df.iloc[i, 1], df.iloc[i, 0])
+            string = string.replace(df.iloc[i]['kegg'], df.iloc[i][col])
         return string
     
     ''' Prints the reactions to add to GEM in wanted form'''
-    def reactions_add_gem(self, data: Data, cobra_model: Microorganism):
+    def reactions_add_gem(self, data: Data, cobra_model: Microorganism, col = 'metabolites'):
         for rxn in self.selected_pathway_reactions:
             equation = data.reactions[rxn].equation
-            equation = self._str_map(equation, cobra_model.metabolites_df)
+            equation = self._str_map(equation, cobra_model.metabolites_df, col)
             print(equation)
 
     def __str__(self):
