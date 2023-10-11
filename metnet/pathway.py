@@ -25,7 +25,6 @@ class Pathway:
         self.path_reactions = None
         # Store the selected pathway reactions after the def select_reactions()
         self.selected_pathway_reactions = None
-
         # Store metabolites available in the host microorganism
         self.cobra_kegg_mets = None
 
@@ -177,12 +176,26 @@ class Pathway:
             string = string.replace(df.iloc[i]['kegg'], df.iloc[i][col])
         return string
     
+    ''' Save reactions to add to GEM to file '''
+    def _reactions_to_file(self, EQS: list, filename: str) -> None:
+        df = pd.DataFrame()
+        df['Reaction'] = ['R' + str(i) for i in range(1, len(EQS)+1)]
+        df['Equation'] = EQS
+        df.to_csv(filename, index=False)
+
     ''' Prints the reactions to add to GEM in wanted form'''
-    def reactions_add_gem(self, data: Data, cobra_model: Microorganism, col = 'metabolites'):
+    def reactions_add_gem(self, data: Data, cobra_model: Microorganism, col = 'metabolites', save=False) -> list:
+        EQS = []
         for rxn in self.selected_pathway_reactions:
             equation = data.reactions[rxn].equation
             equation = self._str_map(equation, cobra_model.metabolites_df, col)
             print(equation)
+            EQS.append(equation)
+        
+        if save:
+            filename = f'../results/{self.source}_{self.target}_{col}_reactions.csv'
+            self._reactions_to_file(EQS, filename)
+        return EQS
 
     def __str__(self):
         return f'Pathway from {self.source} to {self.target}'

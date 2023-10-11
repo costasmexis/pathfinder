@@ -1,0 +1,9 @@
+Reaction,Equation
+R1,atp_c + cit_c + coa_c --> adp_c + pi_c + C00566
+R2,C00566 --> accoa_c + oaa_c
+R3,2 accoa_c --> coa_c + C00332
+R4,C01144 + nad_c --> C00332 + nadh_c + h_c
+R5,C01144 --> C00877 + h2o_c
+R6,C00136 + nad_c --> C00877 + nadh_c + h_c
+R7,C01412 + coa_c + nad_c --> C00136 + nadh_c + h_c
+R8,C01412 + nadh_c + h_c --> C06142 + nad_c

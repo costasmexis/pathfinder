@@ -1,0 +1,10 @@
+Reaction,Equation
+R1,C01384 --> fum_c
+R2,mal__L_c --> fum_c + h2o_c
+R3,mal__L_c + coa_c --> accoa_c + h2o_c + glx_c
+R4,2 accoa_c --> coa_c + C00332
+R5,C01144 + nad_c --> C00332 + nadh_c + h_c
+R6,C01144 --> C00877 + h2o_c
+R7,C00136 + nad_c --> C00877 + nadh_c + h_c
+R8,C01412 + coa_c + nad_c --> C00136 + nadh_c + h_c
+R9,C01412 + nadh_c + h_c --> C06142 + nad_c
