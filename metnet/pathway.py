@@ -25,6 +25,8 @@ class Pathway:
         self.path_reactions = None
         # Store the selected pathway reactions after the def select_reactions()
         self.selected_pathway_reactions = None
+        # Store directions of each selected reaction
+        self.direction = None
         # Store metabolites available in the host microorganism
         self.cobra_kegg_mets = None
 
@@ -71,6 +73,7 @@ class Pathway:
         self.path_compound = path
         self.path_reactions = self.get_pathway_reactions(path)
         self.selected_pathway_reactions = []
+        self.direction = []
         return self.path_compound, self.path_reactions
 
     ''' list of arrays to list of lists '''
@@ -197,5 +200,31 @@ class Pathway:
             self._reactions_to_file(EQS, filename)
         return EQS
 
+    ''' Updates self.direction with the correct direction for every reaction to be added to microorganism'''
+    def get_reactions_direction(self, data: Data, cobra_model: Microorganism) -> None:
+        available_metabolites = cobra_model.metabolites_df['kegg'].values.tolist()
+        for r in self.selected_pathway_reactions:
+            reactants = data.reactions[r].compounds[0]
+            products = data.reactions[r].compounds[1]
+
+            right_arrow = (all([p in available_metabolites for p in reactants]))
+            left_arrow = (all([p in available_metabolites for p in products]))
+
+            if right_arrow: self.direction.append('-->')
+            elif left_arrow: self.direction.append('<--')
+            else: 
+                print('Error: reaction direction not found')
+                break
+
+            if right_arrow:
+                for p in products:
+                    available_metabolites.append(p)
+            elif left_arrow:
+                for p in reactants:
+                    available_metabolites.append(p)
+            else:
+                print('Error: reaction direction not found')
+                break
+            
     def __str__(self):
         return f'Pathway from {self.source} to {self.target}'
