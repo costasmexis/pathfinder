@@ -1,13 +1,13 @@
 Reaction,Equation
 R1,2pg_c --> pep_c + h2o_c
 R2,2pg_c --> 3pg_c
-R3,C00118 + nadp_c + h2o_c --> 3pg_c + nadph_c + h_c
+R3,C00118 + nadp_c + h2o_c <-- 3pg_c + nadph_c + h_c
 R4,C00118 --> dhap_c
 R5,dhap_c + accoa_c --> C20960 + coa_c
 R6,dhap_c + accoa_c --> C20960 + coa_c
 R7,2 accoa_c --> coa_c + C00332
-R8,C01144 + nad_c --> C00332 + nadh_c + h_c
+R8,C01144 + nad_c <-- C00332 + nadh_c + h_c
 R9,C01144 --> C00877 + h2o_c
-R10,C00136 + nad_c --> C00877 + nadh_c + h_c
-R11,C01412 + coa_c + nad_c --> C00136 + nadh_c + h_c
+R10,C00136 + nad_c <-- C00877 + nadh_c + h_c
+R11,C01412 + coa_c + nad_c <-- C00136 + nadh_c + h_c
 R12,C01412 + nadh_c + h_c --> C06142 + nad_c

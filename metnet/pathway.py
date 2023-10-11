@@ -167,14 +167,20 @@ class Pathway:
                     break
 
                 print()
+            
             j += 1
 
             if verbose:
                 print(f"The selected pathway reactions are: {self.selected_pathway_reactions}")        
-
-    def _str_map(self, string, df: pd.DataFrame, col = 'metabolites') -> str:
+        
+        if(len(self.selected_pathway_reactions) == len(self.path_reactions)):
+            pass
+        else:
+            raise ValueError('Error! Did not selected reactions')
+        
+    def _str_map(self, string, df: pd.DataFrame, arrow: str, col = 'metabolites') -> str:
         # Replace <=> with --> in string
-        string = string.replace('<=>', '-->')
+        string = string.replace('<=>', arrow)
         for i in range(len(df)):
             string = string.replace(df.iloc[i]['kegg'], df.iloc[i][col])
         return string
@@ -188,11 +194,12 @@ class Pathway:
 
     ''' Prints the reactions to add to GEM in wanted form'''
     def reactions_add_gem(self, data: Data, cobra_model: Microorganism, col = 'metabolites', save=False) -> list:
+        self._get_reactions_direction(data, cobra_model)
         EQS = []
-        for rxn in self.selected_pathway_reactions:
+        for i, rxn in enumerate(self.selected_pathway_reactions):
             equation = data.reactions[rxn].equation
-            equation = self._str_map(equation, cobra_model.metabolites_df, col)
-            print(equation)
+            arrow = self.direction[i]
+            equation = self._str_map(equation, cobra_model.metabolites_df, arrow, col)
             EQS.append(equation)
         
         if save:
@@ -201,7 +208,7 @@ class Pathway:
         return EQS
 
     ''' Updates self.direction with the correct direction for every reaction to be added to microorganism'''
-    def get_reactions_direction(self, data: Data, cobra_model: Microorganism) -> None:
+    def _get_reactions_direction(self, data: Data, cobra_model: Microorganism) -> None:
         available_metabolites = cobra_model.metabolites_df['kegg'].values.tolist()
         for r in self.selected_pathway_reactions:
             reactants = data.reactions[r].compounds[0]
@@ -213,9 +220,8 @@ class Pathway:
             if right_arrow: self.direction.append('-->')
             elif left_arrow: self.direction.append('<--')
             else: 
-                print('Error: reaction direction not found')
-                break
-
+                raise ValueError('Error! Did not selected reactions')
+                
             if right_arrow:
                 for p in products:
                     available_metabolites.append(p)
@@ -223,8 +229,8 @@ class Pathway:
                 for p in reactants:
                     available_metabolites.append(p)
             else:
-                print('Error: reaction direction not found')
-                break
+                raise ValueError('Error! Did not selected reactions')
+                
             
     def __str__(self):
         return f'Pathway from {self.source} to {self.target}'
