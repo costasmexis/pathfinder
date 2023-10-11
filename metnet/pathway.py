@@ -220,7 +220,7 @@ class Pathway:
             if right_arrow: self.direction.append('-->')
             elif left_arrow: self.direction.append('<--')
             else: 
-                raise ValueError('Error! Did not selected reactions')
+                raise ValueError('Error! Not able to set reaction direction')
                 
             if right_arrow:
                 for p in products:
@@ -229,7 +229,7 @@ class Pathway:
                 for p in reactants:
                     available_metabolites.append(p)
             else:
-                raise ValueError('Error! Did not selected reactions')
+                raise ValueError('Error! Not able to set reaction direction')
                 
             
     def __str__(self):
